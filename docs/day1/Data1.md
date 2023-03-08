@@ -43,14 +43,14 @@ results that look contradictory. Can you explain why ?
 
 
 !!! ideas on how to start
-	Start by opening a new script in R 
-	Write down the problem
-	Open the file (it is EXCEL, how can you open it in R?)
-	Check the columns and see if cleaning is needed, i.e. if there are any problems
-	There is information in the file that can be used for normalizing the data, using the expression of GAPDH ("housekeeping gene"). You do not have to perform this step (you can do it as a second, optional, step if you want)
-	Write down biological hypothesis 
-	Write down statistical hypothesis 
-	Write down (or search for) assumptions of the statistical test
+	- Start by opening a new script in R 
+	- Write down the problem
+	- Open the file (it is EXCEL, how can you open it in R?)
+	- Check the columns and see if cleaning is needed, i.e. if there are any problems
+	- There is information in the file that can be used for normalizing the data, using the expression of GAPDH ("housekeeping gene"). You do not have to perform this step (you can do it as a second, optional, step if you want)
+	- Write down biological hypothesis 
+	- Write down statistical hypothesis 
+	- Write down (or search for) assumptions of the statistical test
 	
 About the file 
 
