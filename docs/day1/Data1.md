@@ -13,8 +13,8 @@
 
 ## Material
 
-[Download the exercise](/docs/assets/exercises/qPCR.xslx){: .md-button }
-[:fontawesome-solid-file-pdf: Download the background help](/docs/assets/pdf/qPCR_dataset.pdf){: .md-button }
+[Download the exercise](../docs/assets/exercises/qPCR.xslx){: .md-button }
+[:fontawesome-solid-file-pdf: Download the background help](../docs/assets/pdf/qPCR_dataset.pdf){: .md-button }
 
 ## Exercises
 
@@ -42,7 +42,7 @@ If you perform the two analysis, you may get
 results that look contradictory. Can you explain why ?
 
 
-!!! ideas on how to start
+??? done ideas on how to start
 	- Start by opening a new script in R 
 	- Write down the problem
 	- Open the file (it is EXCEL, how can you open it in R?)
@@ -67,11 +67,5 @@ housekeeping gene
 for a given biological replicate
 * There is also a calculation of ddct and the log fold change
 ( 2^(-ddct) )
-
-### Knitr
-
-In this additional chapter and exercise you will learn how to generate a reproducible report with theory and practice it on the first exercice.
-
-[:fontawesome-solid-file-pdf: Download the theory](../assets/pdf/knitr-short.pdf){: .md-button }
 
  

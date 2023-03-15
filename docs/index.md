@@ -1,5 +1,19 @@
 # Course website
 
+##Teachers
+
+Rachel Marcone
+Joao Lourenco
+Vincent Roh
+
+##Author 
+
+Rachel Marcone
+
+##Attribution
+
+Parts of this course is inspired by previous developed course of Frederic Schutz and Isabelle Dupanloup.
+
 ## Material
 
 * This website

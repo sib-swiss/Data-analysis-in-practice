@@ -17,8 +17,14 @@
 
 Questions :
 
-1. Inspect the dataset2. Does the mother's age allow us to predict the birth weight below 2.5 kg ?3. Can you use a linear regression model ? What?s wrong with this model ?4. Which model is better adapted to the current situation ?5. Check the assumptions of the model6. Can you better predict birth weight using below 2.5 kg using other variablesin the dataset, in addition to mother?s age ?
+1. Inspect the dataset
+2. Does the mother's age allow us to predict the birth weight below 2.5 kg ?
+3. Can you use a linear regression model ? What?s wrong with this model ?
+4. Which model is better adapted to the current situation ?
+5. Check the assumptions of the model
+6. Can you better predict birth weight using below 2.5 kg using other variables
+in the dataset, in addition to mother?s age ?
 
 ??? done "Answer"
     If needed you can get some more info here 
-    [:fontawesome-solid-file-pdf: Download the presentation](/docs/assets/pdf/ASS22_2.pdf){: .md-button }
+    [:fontawesome-solid-file-pdf: Download the presentation](../docs/assets/pdf/ASS22_2.pdf){: .md-button }

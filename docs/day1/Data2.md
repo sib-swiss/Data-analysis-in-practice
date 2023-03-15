@@ -30,9 +30,9 @@ The birthwt data frame has 189 rows and 10 columns. The data were collectedat B
 
 In order to help you starting try to translate those question to a more statistical framework
 
-??? Answer
+??? done Answer
 	1. Inspect the dataset	2. Apply a simple linear regression model to predict birth weight in grams using mother?s age	3. Check the assumptions of the linear regression model	4. Apply a multiple linear regression model to predict birth weight in grams using multiple predictors	5. Perform model selection
 	
 If needed and you forgot about all these, here is a little quick refreshing of linear models
 
-[:fontawesome-solid-file-pdf: Download the presentation](../assets/pdf/AS22_1.pdf){: .md-button }
+[:fontawesome-solid-file-pdf: Download the presentation](../docs/assets/pdf/AS22_1.pdf){: .md-button }
