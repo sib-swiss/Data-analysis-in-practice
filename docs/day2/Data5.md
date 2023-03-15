@@ -30,7 +30,7 @@ To do :
 
 - Download the data from the website (or load the files from the course page) (EXCEL sheet with tabs corresponding to meta-data and tabs corresponding to raw expression)
 
-[Download exercises](../../docs/assets/pdf/Data5.zip){: .md-button }
+[Download exercises](../../assets/pdf/Data5.zip){: .md-button }
 
 - Observe the data, is it numeric ?
 - Prepare the table, remove genes with sum of the row less or equal to 20.
