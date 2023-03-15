@@ -42,7 +42,7 @@ If you perform the two analysis, you may get
 results that look contradictory. Can you explain why ?
 
 
-??? done ideas on how to start
+??? done "ideas on how to start"
 	- Start by opening a new script in R 
 	- Write down the problem
 	- Open the file (it is EXCEL, how can you open it in R?)
