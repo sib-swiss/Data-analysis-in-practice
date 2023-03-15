@@ -13,7 +13,7 @@
 
 ## Material
 
-[Download the exercise](../../assets/exercises/qPCR.xslx){: .md-button }
+[Download the exercise](../../assets/exercises/qPCR.zip){: .md-button }
 [:fontawesome-solid-file-pdf: Download the background help](../../assets/pdf/qPCR_dataset.pdf){: .md-button }
 
 ## Exercises
