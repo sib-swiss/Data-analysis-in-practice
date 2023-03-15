@@ -1,0 +1,287 @@
+---
+title: "Menstrual cycle data"
+author: "SIB Teachers" ##Best practice always write the name of the author
+date: "`r Sys.time()`" ##and the date of today!
+header-includes:
+    - \usepackage{caption}
+output: 
+  html_document: #funky theme for an html that floats with a special theme for the sections and numbering
+    toc: true 
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: united
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+#start with the general setup the opts_chunk sets the options for all the chunks. 
+knitr::opts_chunk$set(echo = FALSE)
+```
+# Libraries needed
+    
+Here one special library is necessary for this exercise to open xlsx. All other functions are part of the basic packages.
+    
+```{r}
+library(readxl)
+library(dplyr)
+```
+    
+
+# Loading the gene expression data and prepare it
+
+```{r}
+## First start with loading the data
+## Find the data in the paper, load it
+d <- read_excel("/Users/Rachel/Downloads/Data-ex5.xls",sheet=3)
+head(d)
+#rownames(d)<-d[,1]
+#d <- d[,-1]
+#d <- as.data.frame(d)
+```
+
+## Get some information on the data set
+
+```{r}
+## show the number of genes 
+print(dim(d))
+summary(d)
+```
+
+## Remove genes with RowSums less than a value
+```{r}
+## remove genes with less than 20 rowsums
+d1 <- d[rowSums(d[,setdiff(1:dim(d)[2],1)])>10,]
+dim(d1)
+head(d1)
+```
+
+## Load the patients metadata
+
+```{r}
+info <- read.delim("/Users/Rachel/Desktop/Teaching/BCRpaperS_info.csv",sep="\t")
+head(info)
+colnames(info)<-info[1,]
+info <- info[-1,]
+rownames(info)<-info[,1]
+unique(info[,"Menstrual phase"])
+```
+
+## Select F and L only
+
+```{r}
+samples <- rownames(info[info[,"Menstrual phase"]%in%c("L","F"),])
+samples_L <- rownames(info[info[,"Menstrual phase"]=="L",])
+samples_F<- rownames(info[info[,"Menstrual phase"]=="F",])
+```
+
+# PCA of only F and L samples 
+
+## Have a look at the values for the pcs
+```{r}
+d1_select <- as.data.frame(d1[,samples])
+rownames(d1_select)<-d1%>%pull(`#Gene-ID`)
+##plot the data 
+pca <- prcomp(t(d1_select), center = TRUE, scale. = TRUE)
+head(pca$x)
+```
+
+## Using Basic plotting plot the samples 
+
+It appears as if the samples 12-14-15-16-20 cluster together as well as samples 1-3-5-7-8-9-10 and then sample 19. 
+```{r}
+plot(pca$x[,1],pca$x[,2],pch=20,xlim=c(-200,300))
+text(pca$x[, 1:2]+3, gsub("Normal_","N",colnames(d1_select)), col = "red")
+```
+
+## Kmeans clustering confirms the three cluster
+According to the paper these clusters are due to sequencing date.
+```{r}
+kmeans(pca$x,3)$cluster
+```
+
+
+
+## Calculation of significant genes
+
+This takes a little bit of time. It is true that the for loop could be optimised. This is 
+however easier to understand. (Have a look at lapply function!)
+```{r}
+##create an empty vector
+p_value_ttest  <- rep(0,dim(d1_select)[1])
+
+#loop of t test
+for(i in 1:dim(d1_select)[1]){
+	p_value_ttest[i] <- t.test(d1_select[i,samples_L],d1_select[i,samples_F])$p.value
+}
+```
+
+## Plot the significant genes
+```{r}
+hist(p_value_ttest)
+```
+## Multiple correction
+
+```{r}
+##multiple correction
+adj_p_value_ttest <- p.adjust(p_value_ttest,method="bonferroni")
+hist(adj_p_value_ttest)
+```
+
+# New analysis
+We realise that there are batches, maybe due to sequencing depth (?) try to normalize according to logCPM
+For this we need a new package called edgeR
+
+## LogCPM
+
+```{r}
+library(edgeR)
+d1_select <- DGEList(d1_select) ##the object in the right format
+d1_cpm <- edgeR::cpm(d1_select,log=TRUE)
+```
+
+## PCA of logCPM
+
+The clusters appear even more clearly
+```{r}
+pca2 <- prcomp(t(d1_cpm), center = TRUE, scale. = TRUE)
+plot(pca2$x[,1],pca2$x[,2],pch=20,xlim=c(-150,150))
+text(pca2$x[, 1:2]+3, colnames(d1_cpm), col = "red")
+```
+
+True batches are seen. They correspond to the batches described in the paper. What can we do ?
+Include it as a covariate in the linear model.
+
+# Last analysis with covariates
+
+## Create variables
+
+```{r}
+## create a variable Menstrual phase
+Menstrual_phase <- as.factor(info[samples,"Menstrual phase"])
+head(info[samples,])
+##Create a variable for the batches that we have seen 
+Batches <- as.factor(c(rep("B1",7),rep("B2",5),"B3","B2"))
+```
+
+## Calculate of the p-values
+
+```{r}
+p_val <- rep(10,dim(d1_cpm)[1])
+for(i in 1:dim(d1_cpm)[1]){
+	test <- aov(d1_cpm[i,]~Menstrual_phase + Batches)
+	p_val[i]<- summary(test)[[1]][["Pr(>F)"]][1]
+	
+}
+adj_p_value_lm <- p.adjust(p_val,method="BH")
+```
+
+## Plot the adjusted p-values
+
+```{r}
+hist(adj_p_value_lm)
+```
+
+
+## Test for normality
+
+```{r}
+var <-  rep(10,dim(d1_cpm)[1])
+for(i in 1:dim(d1_cpm)[1]){
+	var[i]<-shapiro.test(d1_cpm[i,])$p.value
+}
+var_correct <- p.adjust(var)
+hist(var_correct)
+```
+
+#Miscellanous
+
+## Libraries for a GLM fit 
+
+```{r}
+#install the library edgeR and limma
+library(edgeR)
+library(limma)
+```
+
+```{r}
+##use GLM fits
+head(d1_cpm)
+dge <- DGEList(d1_select)
+design <- model.matrix(~0+ Menstrual_phase + Batches)
+row.names(design)<-colnames(d1_select)
+```
+
+## TMM normalisation
+```{r}
+d.tuch <- calcNormFactors(dge)
+```
+
+
+## make the contrast you are interested in
+```{r}
+contrast.mat <- contrast.mat <- makeContrasts(
+Menstrual_phaseF - Menstrual_phaseL,
+levels=design)
+```
+
+## estimate dispersions do the fitting and testing
+```{r}
+dge <- estimateDisp(d.tuch, design = design)
+fit <- glmQLFit(dge, design = design,robust=TRUE)
+qlf <- glmQLFTest(fit,contrast=contrast.mat)
+tt <- topTags(qlf, n = Inf)
+dim(tt)
+hist(tt$table[,"FDR"])
+tt$table[tt$table[,"FDR"]<0.05,]
+```       
+       
+## correlation with estriol levels
+       
+Pearson makes less sense than Spearman as spearman is ranking and as we actually do not have the exact values for the values below 0.02
+### Prepare the column of interest
+```{r}
+data_estriol <- info[samples,"Estriol ng/mL"]
+names(data_estriol) <- samples
+data_estriol <- gsub(",",".",data_estriol)
+data_estriol <- gsub("<","",data_estriol)
+data_estriol <- as.numeric(data_estriol)
+names(data_estriol) <- samples
+head(d1_cpm)
+```
+
+### Do the correlations
+
+Print the number of significant genes after multiple correction.
+
+```{r}
+w <- cor(t(d1_cpm[,samples]),data_estriol)
+wp <- rep(0,dim(d1_cpm)[1])
+cor.score <- rep(0,dim(d1_cpm)[1])
+for(i in 1:dim(d1_cpm)[1]){
+  temp <- cor.test(t(d1_cpm)[,i],data_estriol)
+wp[i] <- temp$p.value
+cor.score[i]<- temp$estimate
+}
+names(wp)<- rownames(d1_cpm)
+wp2 <- p.adjust(wp,"BH")
+length(wp2[wp2<0.05])
+
+plot(w,-log(wp,10),pch=16)
+abline(v=-0.5,col="red")
+abline(v=0.5,col="red")
+abline(h = -log10(0.05),col="red")
+```
+
+
+### negatively correlating genes
+```{r}
+genes <- intersect(names(wp[wp<0.05]),names(w[w<(-0.5),]))
+genes
+```
+
+### positively correlating genes
+```{r}
+genes <- intersect(names(wp[wp<0.05]),names(w[w>(0.5),]))
+genes
+```

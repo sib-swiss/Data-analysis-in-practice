@@ -1,0 +1,235 @@
+---
+title: "Data science in practice: qPCR dataset"
+author: "Mateusz Kozak"
+date: "6/3/2022"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r}
+library(tidyverse)
+library(ggsignif)
+library(readxl)
+```
+
+# Load data
+
+```{r}
+qpcr <- read_excel('data/qPCR.xlsx', range = cell_cols('A:D'),
+                   col_types = c('text', 'text', 'text', 'numeric'))
+```
+Thanks to the fact that we supplied a column specification,
+we can see that some data was not entered correctly.
+Curiously `read_excel` does not print a column specification otherwise;
+had we not supplied the spec it would have been nice to see the (wrong) guesses.
+We *could* fix this, but this is the *test* data
+which I don't think we are supposed to include in the analysis anyway.
+
+I would like to do a couple more things as far as pre-processing goes:
+
+  1. The `test` group does not belong in the analysis. Let's remove it.
+  2. All variables except for `ct` are categorical. Let's turn them into factors.
+  3. `group` contains information about two different things: genotype and treatment.
+  Let's make those variables.
+
+```{r}
+qpcr <- qpcr[qpcr$group != 'test',]
+
+qpcr <- qpcr %>%
+  separate(group, into = c('genotype', 'treatment'), sep = ' ') %>%
+  mutate(treatment = fct_recode(treatment, ctrl = 'C', trt = 'T'),
+         genotype = as_factor(genotype),
+         gene = as_factor(gene),
+         sample.ID = as_factor(sample.ID))
+```
+
+Here is our tidy data frame:
+
+```{r}
+str(qpcr)
+head(qpcr)
+```
+
+
+```{r}
+save(qpcr, file = 'data/qPCR_clean.RData')
+write_csv(qpcr, file = 'data/qPCR_clean.csv')
+rm(list = ls())
+```
+
+```{r}
+load('data/qPCR_clean.RData')
+```
+
+# Analysis
+
+## A point of ambiguity
+
+What I don't know is whether the AKT / GAPDH results
+are paired within technical repeats;
+i. e. whether two measurements are taken during a single run
+or whether there are three independent runs
+for the target (AKT) and control (GAPDH) each.
+
+The answer to this question changes the analysis.
+If they are paired, we can introduce one more variable
+linking the technical repeats and perform baseline adjustment
+by subtracting GAPDH reading from the AKT reading
+for each technical replicate.
+It they are *not* paired,
+then I believe the best approach to normalization
+is to subtract *average* GAPDH reading 
+from the *average* AKT reading.
+Alternatively, we can do no subtracting 
+and include the GAPDH reading as predictor in a linear model;
+depending on whether or not 
+we provide tech replicate in the formula
+
+## Transform and average
+
+```{r}
+qpcr_wide <- qpcr %>% 
+  mutate(rep = rep(c(1,2,3), length.out = nrow(qpcr)))%>%
+  pivot_wider(values_from = ct, names_from = gene)%>%
+  mutate(dct = AKT - GAPDH)
+
+qpcr_wide_agg <- qpcr_wide %>%
+  group_by(genotype, treatment, sample.ID) %>%
+  summarise(across(c(AKT, GAPDH, dct), list(mean = mean)),
+            .groups = 'drop')
+```
+
+```{r}
+qpcr_plot <- ggplot(qpcr_wide, aes(x = treatment, y = dct))+
+  geom_jitter(width = 0.2, aes(color = sample.ID), shape = 21)+
+  stat_summary(aes(fill = sample.ID), 
+               shape = 21, size = 3,
+               fun = mean, geom = 'point')+
+  stat_summary(fun = mean, geom = 'crossbar', fatten = 1, width = 0.5)+
+  stat_summary(fun.data = 'mean_cl_normal', geom = 'errorbar', width = 0.1)+
+  theme_classic()+
+  facet_wrap(~genotype)
+
+print(qpcr_plot)
+```
+
+## Do a t-test?
+
+```{r}
+ttests <- qpcr_wide_agg %>%
+  nest_by(genotype) %>% 
+  mutate(ttest = list(t.test(dct_mean ~ treatment, data = data)))
+
+ttests <- ttests %>%
+  summarise(ttest = broom::tidy(ttest)) %>%
+  unnest(cols = c(ttest))
+
+ttests$adj.p.val <- p.adjust(ttests$p.value, method = 'bonferroni')
+```
+
+
+
+```{r}
+ttests
+```
+
+### Plot with adjusted t-tests
+
+```{r}
+annotation_df <- data.frame(genotype = ttests$genotype,
+                            annotations = round(ttests$adj.p.val, 3),
+                            xmin = 'ctrl', treatment = 'trt',
+                            y_position = 2.2)
+
+qpcr_plot+
+  geom_signif(data = annotation_df,
+              aes(annotations = annotations, 
+                  xmin = xmin, xmax = treatment, y_position = y_position),
+              manual = TRUE)
+```
+
+
+## Linear model / two-way ANOVA
+
+Since we want to see if dct *change* changes with genotype,
+we will try a two-way ANOVA with interaction.
+
+### Model
+
+```{r}
+mod <- lm(dct_mean ~ treatment + genotype + treatment * genotype,
+          data = qpcr_wide_agg)
+
+anova(mod)
+```
+
+With a traditional $p = 0.05$ cut-off,
+none of these are significant.
+
+I *think* the interpretation is the following:
+
+  * ignoring the genotype differences, 
+    treatment is close to significance at 0.06
+  * ignoring treatment differences, 
+    genotypes are not different
+  * the difference of treatments in two genotypes
+    is *also* not different
+    
+The interaction can be illustrated by the plot below.
+
+But also:
+
+### Interaction model diagnostics
+
+```{r}
+plot(mod)
+```
+
+Looks like a big problem with unequal variances,
+which we already saw in the data plots.
+
+### Interaction plot
+
+```{r}
+with(qpcr_wide, (interaction.plot(treatment, genotype, dct)))
+```
+
+And with points:
+
+```{r}
+ggplot(qpcr_wide, aes(treatment, dct, color = genotype))+
+  stat_summary(aes(group = sample.ID),
+               shape = 21, fun = mean, geom = 'point')+
+  stat_summary(aes(group = genotype), fun = mean, geom = 'line')+
+  theme_classic()
+```
+
+I *think* this illustrates 
+what we are talking about in this model:
+is the slope of control vs treatment
+different based on the genotype?
+That's what the interaction term in the model
+can answer, and it's not.
+
+```{r}
+mod2 <- lm(dct_mean ~ treatment + genotype, data = qpcr_wide_agg)
+anova(mod2)
+
+mod2_emm <- emmeans::emmeans(mod2, 'treatment')
+```
+
+So: treatment effect is not significant
+considering all data,
+that is kind of expected.
+
+But can we say that treatment effect is significant for WT cells,
+based on the previous t-tests? That's what bugs me.
+
+### Main effects model diagnostic
+
+```{r}
+plot(mod2)
+```
+
