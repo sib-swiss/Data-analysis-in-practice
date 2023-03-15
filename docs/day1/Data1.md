@@ -13,7 +13,7 @@
 
 ## Material
 
-[Download the exercise](Data-analysis-in-practice/docs/assets/exercises/qPCR.xslx){: .md-button }
+[Download the exercise](../../docs/assets/exercises/qPCR.xslx){: .md-button }
 [:fontawesome-solid-file-pdf: Download the background help](Data-analysis-in-practice/docs/assets/pdf/qPCR_dataset.pdf){: .md-button }
 
 ## Exercises
