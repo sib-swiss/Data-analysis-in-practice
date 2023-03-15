@@ -27,4 +27,4 @@ in the dataset, in addition to mother?s age ?
 
 ??? done "Answer"
     If needed you can get some more info here 
-    [:fontawesome-solid-file-pdf: Download the presentation](../docs/assets/pdf/ASS22_2.pdf){: .md-button }
+    [:fontawesome-solid-file-pdf: Download the presentation](../../docs/assets/pdf/ASS22_2.pdf){: .md-button }

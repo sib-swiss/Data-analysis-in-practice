@@ -30,7 +30,7 @@ To do :
 
 - Download the data from the website (or load the files from the course page) (EXCEL sheet with tabs corresponding to meta-data and tabs corresponding to raw expression)
 
-[Download exercises](../docs/assets/pdf/Data5.zip){: .md-button }
+[Download exercises](../../docs/assets/pdf/Data5.zip){: .md-button }
 
 - Observe the data, is it numeric ?
 - Prepare the table, remove genes with sum of the row less or equal to 20.
@@ -38,7 +38,7 @@ To do :
 F=Follicular, not HC=Hormone Contraceptives)
 - Perform a dimension reduction using principal component analysis.
 - What do you observe?
-- Sequencing depth might be different from sample to sample. Convert the data to log counts per million (this is recommanded for sequencing data)
+- Sequencing depth might be different from sample to sample. Convert the data to log counts per million (this is recommended for sequencing data)
 - Do a loop of t.test to find which genes are significant between Luteal
 and Follicular phase.
 - How many significant genes ? Did you adjust for multiple testing ?
