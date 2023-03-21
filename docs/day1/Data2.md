@@ -54,4 +54,4 @@ In order to help you starting, try to translate those question to a more statist
 	
 If needed and you forgot about all these, here is a little quick refreshing on linear models
 
-[:fontawesome-solid-file-pdf: Download the presentation](../../docs/assets/pdf/AS22_1.pdf){: .md-button }
+[:fontawesome-solid-file-pdf: Download the presentation](../../assets/pdf/AS22_1.pdf){: .md-button }
