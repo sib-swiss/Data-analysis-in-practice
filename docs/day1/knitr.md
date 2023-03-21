@@ -1,7 +1,7 @@
-### Knitr
+### Generate reports with _knitr_
 
-In this additional chapter and exercise you will learn how to generate a reproducible report with theory and practice it on the first exercice.
+In this additional chapter you will learn how to generate a reproducible report using the  _knitr_ package, and practice it on the first exercice.
 
-[:fontawesome-solid-file-pdf: Download the theory](../../assets/pdf/knitr-short.pdf){: .md-button }
+[:fontawesome-solid-file-pdf: Download the presentation](../../assets/pdf/knitr-short.pdf){: .md-button }
 
  

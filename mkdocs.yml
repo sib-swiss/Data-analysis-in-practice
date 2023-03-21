@@ -1,16 +1,16 @@
 site_name: Data analysis in practice
 nav:
     - Home: index.md
-    - Precourse preparations: precourse.md
+    - Precourse preparation: precourse.md
     - Course schedule: course_schedule.md
     - Day 1:
-      - Data1-qPCR: day1/Data1.md
-      - Theory: day1/knitr.md
-      - Data2-Birthweight: day1/Data2.md
+      - Data 1- "qPCR": day1/Data1.md
+      - Knitr: day1/knitr.md
+      - Data 2 - "Birth weight": day1/Data2.md
     - Day 2:
-      - Data3-Birthweight again: day2/Data3.md
-      - Data4-Simulations: day2/Data4.md
-      - Data5-Hormone action: day2/Data5.md
+      - Data 3 -"Birth weight" (again): day2/Data3.md
+      - Data 4 - Microarray simulation: day2/Data4.md
+      - Data 5 - "Hormone action": day2/Data5.md
 
 
 

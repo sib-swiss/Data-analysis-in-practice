@@ -1,5 +1,5 @@
-This course aims at practicing known statistical concepts, which have been covered in our course "Introduction to statistics with R". Take a look at the webpage https://sib-swiss.github.io/Introduction-to-statistics-with-R/ to test your skills or refresh your memory!
+This course aims at practicing known statistical concepts, which have been covered in our course "Introduction to statistics with R". Take a look at the webpage [IntroductionStatisticsWithR] (https://sib-swiss.github.io/Introduction-to-statistics-with-R/ “Introduction to Statistics with R”)  to test your skills or refresh your memory!
 
-This two-day course will be taught in an "inverse classroom" style: the students will be organized in groups and will analyze various biomedical datasets, using information provided by the trainers. The groups will present their results which will then be discussed with the other groups and the trainers.
 
-The datasets will be chosen to allow to cover the most common questions that arise during statistical analysis, including the assumptions of tests (and the requirement for normality of data in particular), the handling of outliers and of missing data.
+
+

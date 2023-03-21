@@ -2,10 +2,10 @@
 
 **After having completed this chapter you will be able to:**
 
-- Understand real world data
+- Analyse real world data
 - Obtain biological insights into hormone action
 - Answer a biological question
-- First steps into NGS data 
+- Analyse (simple) NGS data
 - Find the right statistical tools to use
 - Interpret the results
 - Report results
@@ -14,17 +14,14 @@
 
 ### Hormone action
 
-We will work with the dataset from this link https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4053088/ a paper published in 2014 from Ivanesa Pardo et al. published in Breast Cancer Research. 
+We will work with the dataset from this link [ABreastCancerResearch] (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4053088/ "Next-generation transcriptome sequencing of the premenopausal breast epithelium using specimens from a normal human breast tissue bank") a paper published in 2014 from Ivanesa Pardo _et_ _al_. published in Breast Cancer Research. 
 
-The normal human breast is under the influence of many endogenous (from the body) hormones as well as exogenous hormones (for instance from contraception)
+The normal human breast is under the influence of many endogenous (from the body) hormones as well as exogenous hormones (for instance from contraception). The authors wanted to study the changes in the messanger RNA of the normal breast epithelium induced by hormones, by comparing normal (healthy) breast tissue from 20 premenopausal donors.
 
-Using normal (healthy) breast tissue from 20 premenopausal donors, the changes in the mRNA of the normal breast epithelium was studied.
+20 biopsies from pre-menopausal women were taken, and Next-generation whole transcriptome sequencing (RNA-Seq) was performed to measure mRNA expression in those biopsies.  At the day of the biopsy, women were asked to fill a questionnaire about their menstrual cycle (day, phase) and type of contraception.
 
-Women answered a full questionary at the day of the biopsy, such as menstrual cycle day and hormonal contraception with information of the type of contraception.
 
-Next-generation whole transcriptome sequencing (RNA-Seq) was used to study mRNA expression in those biopsies.
 
-20 biopsies from pre-menopausal women with indication of phase of the menstrual cycle (follicular or luteal phase) or hormonal contraception (corresponding to 9, 5 and 6 samples respectively)
 
 To do :
 
@@ -33,22 +30,20 @@ To do :
 [Download exercises](../../assets/exercises/Data5.zip){: .md-button }
 
 - Observe the data, is it numeric ?
-- Prepare the table, remove genes with sum of the row less or equal to 20.
+- Prepare the table, remove genes with sum of the row less or equal to 20
 - Select only patients that are not taking contraceptives (L=Luteal and
 F=Follicular, not HC=Hormone Contraceptives)
-- Perform a dimension reduction using principal component analysis.
-- What do you observe?
+- Perform a dimension reduction using principal component analysis
+- What do you observe ?
 - Sequencing depth might be different from sample to sample. Convert the data to log counts per million (this is recommended for sequencing data)
-- Do a loop of t.test to find which genes are significant between Luteal
-and Follicular phase.
-- How many significant genes ? Did you adjust for multiple testing ?
-Again perform a dimension reduction using principal component
-analysis.
-- What do you observe now ? Are there any clear groups?
-- Check inside the paper, in the analysis of the sequencing. Were there any batches?
+- Do a loop of t.test to find which genes are significantly differentially expressed between Luteal
+and Follicular phase
+- How many significant genes do you find ? Did you adjust for multiple testing ?
+- Again perform a dimension reduction using principal component
+analysis. What do you observe now ? Are there any clear groups ?
+- Check in the paper (in the analysis of the sequencing): were there any batches ?
 - Include batches into a linear model to infer differential expression between menstrual phase groups (L=Luteal, F= Follicular)
-- What do you observe?
+- What do you observe ?
 
 
-Bonus: Find out which genes are correlated with Estradiol
-concentration in blood.
+Bonus: Find out which genes are correlated with Estradiol concentration in blood.
