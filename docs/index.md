@@ -14,9 +14,9 @@ Rachel Marcone, Joao Lourenco and Vincent Roh
 
 Rachel Marcone
 
-##Attribution
+##Credits
 
-Parts of this course is inspired by previous developed course of Frederic Schutz and Isabelle Dupanloup.
+Parts of this course were inspired by a previous course developed by Frederic Schutz and Isabelle Dupanloup.
 
 ## Material
 
