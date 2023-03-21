@@ -1,5 +1,6 @@
 #Data analysis in practice
 
+
 This two-day course will be taught in an "inverse classroom" style: the students will be organized in groups and will analyze various biomedical datasets, using information provided by the trainers. The groups will present their results which will then be discussed with the other groups and the trainers.
 
 The datasets will be chosen in orther cover the most common issues that can arise during statistical analysis, including verifying the assumptions of tests (the requirement for normality of data in particular), the handling of outliers and of missing data.
