@@ -14,7 +14,7 @@
 
 ### Hormone action
 
-We will work with the dataset from this link [ABreastCancerResearch](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4053088/ "Next-generation transcriptome sequencing of the premenopausal breast epithelium using specimens from a normal human breast tissue bank") a paper published in 2014 from Ivanesa Pardo _et_ _al_. published in Breast Cancer Research. 
+We will work with the dataset from this link [Next-generation transcriptome sequencing of the premenopausal breast epithelium using specimens from a normal human breast tissue bank](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4053088/) a paper published in 2014 from Ivanesa Pardo _et_ _al_. published in Breast Cancer Research. 
 
 The normal human breast is under the influence of many endogenous (from the body) hormones as well as exogenous hormones (for instance from contraception). The authors wanted to study the changes in the messanger RNA of the normal breast epithelium induced by hormones, by comparing normal (healthy) breast tissue from 20 premenopausal donors.
 
