@@ -4,6 +4,7 @@ nav:
     - Precourse preparation: precourse.md
     - Course schedule: course_schedule.md
     - Day 1:
+      - Introduction: day1/Intro.md
       - Data 1- "qPCR": day1/Data1.md
       - Knitr: day1/knitr.md
       - Data 2 - "Birth weight": day1/Data2.md
