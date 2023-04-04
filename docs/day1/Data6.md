@@ -17,6 +17,31 @@ TCGA stands for the cancer genome atlas. Choose your favourite cancer and downlo
 ??? Hint
 	Download and use the TCGAbiolinks package to be able to retrieve more easily data.
 	 
+```r
+query <- GDCquery(project = "TCGA-CESC", 
+                  data.category = "Gene expression",
+                  data.type = "Gene expression quantification",
+                  experimental.strategy = "RNA-Seq",
+                  platform = "Illumina HiSeq",
+                  file.type = "results", 
+                  legacy = TRUE)
+
+# Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
+GDCdownload(query)
+
+#prepare table
+?GDCprepare
+
+CESCrnaseqSE <- GDCprepare(query,save=TRUE,save.filename="object_tcga_cesc")
+head(CESCrnaseqSE)
+
+library(SummarizedExperiment)
+
+CESCMatrix <- assay(CESCrnaseqSE,"raw_count")
+
+## retrieve clinical data
+clin.cesc <- GDCquery_clinic("TCGA-CESC", "clinical")
+```	 
 #### Questions
 
 1. Inspect the dataset
