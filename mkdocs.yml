@@ -7,6 +7,7 @@ nav:
       - Introduction: day1/Intro.md
       - Data 1- "qPCR": day1/Data1.md
       - Knitr: day1/knitr.md
+      - Data Bonus - "Kaplan Meier": day1/Data6.md
       - Data 2 - "Birth weight": day1/Data2.md
     - Day 2:
       - Data 3 -"Birth weight" (again): day2/Data3.md
