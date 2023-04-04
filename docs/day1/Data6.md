@@ -24,9 +24,10 @@ TCGA stands for the cancer genome atlas. Choose your favourite cancer and downlo
 3. Formulate point 2 into a biological null hypothesis and then into a statistical one
 4. Still using TCGAbiolinks package try to assess if the chosen meta data columns are associated with survival
 5. TCGAbiolinks provides a framework to do the survival curves, what if you have not TCGA data, how would you have written it ?
-6. Bonus : Generate a signature of 10 genes (can choose them randomly) and check if this signature is associated with outcome
+
 
 ??? done "Hint"
 	Check the code of the function, do you know how ?
 	Hint of the hint: write the function in R without the parenthesis.
 
+6. Bonus : Generate a signature of 10 genes (can choose them randomly) and check if this signature is associated with outcome
