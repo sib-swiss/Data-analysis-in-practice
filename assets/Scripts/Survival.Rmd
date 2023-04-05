@@ -1,0 +1,90 @@
+---
+title: "KMcurves"
+author: "Rachel Marcone"
+date: '2023-04-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+load("/Users/Rachel/object_tcga_cesc")
+
+CESCMatrix <- assay(data,"raw_count")
+```
+
+The CESC data has `r dim(CESCMatrix)[1]` genes and
+`r dim(CESCMatrix)[2]` patients
+
+```{r,echo=FALSE}
+clin.cesc <- GDCquery_clinic("TCGA-CESC", "clinical")
+```
+
+The clinical data has `r dim(clin.cesc)[2]` columns of information.
+
+
+## Interaction
+
+We first create two simple variables with only two categories. One linked to diagnosis, only adeno or squamous carcinoma and the other linked to the age. 
+
+```{r OR_table}
+clin.cesc$simple <- clin.cesc$primary_diagnosis
+
+clin.cesc[grep("deno",clin.cesc$primary_diagnosis),"simple"] <- "Adenocarcinoma"
+clin.cesc[grep("quamous",clin.cesc$primary_diagnosis),"simple"] <- "Squamous"
+clin.cesc$age_simple <- factor("young",levels=c("young","old"))
+clin.cesc$age_at_diagnosis[c(78,290)]<-0
+clin.cesc[clin.cesc$age_at_diagnosis > 17020,"age_simple"] <- "old"
+table(clin.cesc$age_simple)
+table(clin.cesc$age_simple,clin.cesc$simple)
+```
+
+## Association using chisq.test
+
+This indicates no significance, this test could have been also justified here, however is usually having the assumption that you have a large dataset.
+
+```{r chisq}
+chisq.test(table(clin.cesc$age_simple,clin.cesc$simple))
+```
+
+## Fisher test
+
+This indicates no significance. A fisher test is preferred as it corresponds to the calculation done in epidemiological studies and corresponds to the data. It needs a contingency tables and calculates the odds of an event occuring in one group vs the other which is exactly what we want here.
+
+```{r fisher_test}
+fisher.test(table(clin.cesc$age_simple,clin.cesc$simple))
+```
+
+## Survival curves
+
+### Age relation with survival
+
+```{r}
+TCGAanalyze_survival(clin.cesc,clusterCol="age_simple")
+```
+
+### Signature for survival
+
+There are nice packages that exist to calculate a signature on a gene expression data set such as hacksig. Here we decided to simply calculate it using a zscore of the dataset. When one talks about RNAseq there is a biais in terms of the total RNA content of one sample. Simply speaking a sample which overal has 2 times more RNA (and there for reads) than another sample is expected on average to have 2 times more expression per gene than the other sample. To correct for that one does a normalization that takes into account the depth of sequencing. This is called CPM or counts per million. In the edgeR package cpm are implemented and enable you to do this in an easy way using the cpm() function. 
+
+```{r}
+library(edgeR)
+CESCMatrix_c <- cpm(CESCMatrix)
+scaled <- t(apply(CESCMatrix_c,1,scale))
+var <- apply(scaled[sample(nrow(scaled),10),],2,mean)
+names(var)<-substr(colnames(CESCMatrix),1,12)
+head(var)
+head(clin.cesc$bcr_patient_barcode)
+
+samples_high_var <- names(var[var>median(var)])
+
+
+clin.cesc$signature <- factor("low",levels=c("low","high"))
+clin.cesc[clin.cesc$bcr_patient_barcode%in%samples_high_var,"signature"] <- "high"
+
+table(clin.cesc$signature)
+
+TCGAanalyze_survival(clin.cesc,clusterCol="signature",filename="Signature_survival.pdf")
+
+```

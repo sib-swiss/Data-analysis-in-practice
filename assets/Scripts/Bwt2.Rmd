@@ -1,0 +1,158 @@
+---
+title: "Logistic regression (Birth weight data)"
+author: "Rachel Marcone"
+date: "05/04/2023"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## File import
+
+```{r}
+library(MASS)
+
+data(birthwt)
+summary(birthwt)
+
+help(birthwt)
+
+colnames(birthwt)
+colnames(birthwt) <- c("birthwt.below.2500", "mother.age","mother.weight", "race",
+                       "smoking.status", "nb.previous.prem.labor",  "hypertension", 
+                       "uterine.irrit","nb.physician.visits", "birthwt.grams")
+
+str(birthwt)
+summary(birthwt)
+birthwt$race <- as.factor(birthwt$race)
+birthwt$smoking.status <- as.factor(birthwt$smoking.status)
+birthwt$nb.physician.visits <- as.factor(birthwt$nb.physician.visits)
+birthwt$uterine.irrit  <- as.factor(birthwt$uterine.irrit )
+
+birthwt$hypertension  <- as.factor(birthwt$hypertension )
+
+birthwt$nb.previous.prem.labor  <- as.factor(birthwt$nb.previous.prem.labor )
+
+str(birthwt)
+summary(birthwt)
+```
+
+
+
+## Model to predict birth weight below 2500 g using mother's age
+
+```{r}
+plot(x=NULL, y=NULL, xlim=range(10,50), ylim=range(-0.5,1.5), 
+     ylab = "Birth Weight (below 2500 g)", xlab="Mother's age")
+points(birthwt$mother.age, birthwt$birthwt.below.2500)
+
+lm1 <- lm(birthwt.below.2500 ~ mother.age, data = birthwt)
+lm1
+summary(lm1)
+
+abline(lm1, col="red", lwd=2)
+
+new.mother.age = 55
+predict.lm(lm1, newdata=data.frame(mother.age=new.mother.age))
+
+glm1 <- glm(birthwt.below.2500 ~ mother.age, data = birthwt, family = binomial)
+glm1
+summary(glm1)
+
+plot(x=NULL, y=NULL, xlim=range(10,50), ylim=range(-0.5,1.5), 
+     ylab = "Birth Weight (below 2500 g)", xlab="Mother's Age")
+points(fitted(glm1) ~ birthwt$mother.age)
+curve(exp(glm1$coefficients[[1]]+glm1$coefficients[[2]]*x)/(1+exp(glm1$coefficients[[1]]+glm1$coefficients[[2]]*x)), add=TRUE)
+```
+
+
+
+### Assumtions of logistic regression:
+
+ * The outcome is a binary or dichotomous variable like yes vs no, positive vs negative, 1 vs 0.
+ * There is a linear relationship between the logit of the outcome and each predictor variables. 
+   Recall that the logit function is logit(p) = log(p/(1-p)), where p is the probabilities of the outcome.
+
+```{r}
+require(car)
+residualPlot(glm1, type = "deviance")
+residualPlot(glm1, type = "response")
+residualPlot(glm1, type = "pearson")
+```
+
+The residual plot displays the residuals against the linear predictors. 
+Ideally, the plots will produce flat red lines; curved lines represent non-linearity. 
+
+ * There is no influential values (extreme values or outliers) in the continuous predictors
+
+```{r}
+plot(glm1, 4, id.n = 4)
+abline(a = 4/dim(birthwt)[1], b = 0)
+```
+
+ * There is no high intercorrelations (i.e. multicollinearity) among the predictors.
+
+
+
+## Model to predict birth weight below 2500 g using multiple predictors
+
+```{r}
+glm2 <- glm(birthwt.below.2500 ~ mother.weight+race+smoking.status+hypertension+uterine.irrit, data = birthwt, 
+            family = binomial)
+glm2
+summary(glm2)
+
+plot(x=NULL, y=NULL, xlim=range(80,250), ylim=range(-0.5,1.5), 
+     ylab = "Birth Weight (below 2500 g)", xlab="Mother's weight")
+points(fitted(glm2) ~ birthwt$mother.weight)
+```
+
+
+
+### Assumtions of logistic regression:
+
+ * The outcome is a binary or dichotomous variable like yes vs no, positive vs negative, 1 vs 0.
+ * There is a linear relationship between the logit of the outcome and each predictor variables. 
+   Recall that the logit function is logit(p) = log(p/(1-p)), where p is the probabilities of the outcome.
+
+```{r}
+require(car)
+residualPlot(glm2, type = "deviance")
+residualPlot(glm2, type = "response")
+residualPlot(glm2, type = "pearson")
+```
+
+The residual plot displays the residuals against the linear predictors. 
+Ideally, the plots will produce flat red lines; curved lines represent non-linearity. 
+
+ * There is no influential values (extreme values or outliers) in the continuous predictors
+
+```{r}
+plot(glm2, 4, id.n = 3)
+abline(a = 4/dim(birthwt)[1], b = 0)
+```
+
+ * Multicollinearity is an important issue in regression analysis and should be fixed by removing 
+   the concerned variables. It can be assessed using the R function vif() [car package], which computes 
+   the variance inflation factors.
+   Variance inflation factors range from 1 upwards. 
+   The numerical value for VIF tells you (in decimal form) what percentage the variance (i.e. 
+   the standard error squared) is inflated for each coefficient. For example, a VIF of 1.9 tells you 
+   that the variance of a particular coefficient is 90% bigger than what you would expect if there was 
+   no multicollinearity - if there was no correlation with other predictors.
+   A rule of thumb for interpreting the variance inflation factor:
+   1 = not correlated.
+   Between 1 and 5 = moderately correlated.
+   Greater than 5 = highly correlated.
+
+```{r}
+car::vif(glm2)
+```
+
+In our example, there is no collinearity: all variables have a value of VIF well below 5.

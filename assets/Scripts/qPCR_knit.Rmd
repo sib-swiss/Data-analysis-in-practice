@@ -1,0 +1,150 @@
+---
+title: "qPCR"
+author: "Rachel Marcone"
+date: '2023-04-04'
+output: html_document
+---
+
+## Import file into R
+
+To import the data, we can either read the Excel file directly (using the 'readxl' package, or first export to CSV and read the resulting file into R and prepare it.
+
+```{r prepare_the_data,echo=FALSE}
+
+setwd("/Users/Rachel/Data-analysis-in-practice/docs/assets/exercises/qPCR")
+# Read Excel file directly
+library(readxl)
+qPCR <- read_excel("qPCR.xlsx")
+# This produces a Tibble; if you are not used to work with Tibble,
+# you can convert it back to a data frame
+data <- as.data.frame(qPCR)
+# Note that we will still need to clean this file (see below
+summary(data)
+
+```
+
+same but with message = FALSE 
+
+```{r prepare_the_data2,echo=FALSE,message=FALSE}
+
+setwd("/Users/Rachel/Data-analysis-in-practice/docs/assets/exercises/qPCR")
+# Read Excel file directly
+library(readxl)
+qPCR <- read_excel("qPCR.xlsx")
+# This produces a Tibble; if you are not used to work with Tibble,
+# you can convert it back to a data frame
+data <- as.data.frame(qPCR)
+# Note that we will still need to clean this file (see below
+summary(data)
+
+```
+
+Export file in CSV format.
+Warning: the options you use for read.table depend on how you exported the data
+
+```{r prepare_the_data_alternate,echo=FALSE,eval=FALSE}
+data <- read.table("qPCR-xls.csv", header=TRUE, sep="\t", na.strings="?",                   quote="", as.is=TRUE)
+```
+
+
+### Conversion of CT column
+
+Change it to numeric, be careful about NAs
+
+We have realized that the Ct columns contains issues; we can find what they are by trying to convert the column to a numeric and check which numbers were not converted:
+
+```{r}
+
+head(data$ct)
+# Read files after it was exported from Excel:
+
+
+# At this point we have to make sure that we have meaningful names for
+# the columns; in the rest of this script we use those from the CSV file.
+
+
+converted <- as.numeric(data$ct)
+which(is.na(converted))
+data$ct[which(is.na(converted))]
+# We have a value 17,23 (with a comma instead of a decimal point),
+# which we can correct in the following way:
+data$ct[data$ct == "17,21"] <- 17.21
+data$Ct <- as.numeric(data$ct)
+summary(data)
+```
+
+The group variable should be two separate columns
+
+```{r group,echo=FALSE}
+# It works now
+data$group
+# Warnings:
+#  * you may have to change the "?" in order to transform it to NA (if you
+#    used the read.table() command above, it was already taken care of.
+#  * you may still have to remove the first (empty) line 
+#    data <- data[-1,]
+
+# We now have to split the column "SampleName" into Genotype and Treatment
+#
+# Using base R:
+splitname <- strsplit(data$group, " ")
+newcolumns <- do.call(rbind, splitname)
+colnames(newcolumns) <- c("Genotype", "Treatment")
+data <- cbind(data, newcolumns)
+```
+
+Using the tidyverse package
+
+```{r prepare_the_data_with_Tidy,echo=FALSE,eval=FALSE}
+library(dplyr) 
+library(tidyr)
+splitdata <- data %>%
+  separate(group, c("Genotype", "Treatment"), " ")
+# Note that in this case, we do not have the SampleName column anymore.
+
+```
+
+## How to get rid of technical replicates
+
+```{r aggregate,echo=FALSE}
+library(dplyr) 
+library(tidyr)
+# How to summarize the technical replicates into 1 value ?
+
+# With base R: the aggregate command takes the value to be aggregated,
+# a list of values to keep and aggregate on, and the function to use
+# for aggregation
+agdata <- aggregate( data$Ct,
+                     list( ID=data$sample.ID,
+                           Genotype=data$Genotype,
+                           Treatment=data$Treatment),
+                     FUN=mean)   
+
+
+
+# Using the tidyverse:
+agdata_tidy <- as.data.frame( data %>% 
+                           group_by(`sample.ID`, gene, Genotype, Treatment) %>%
+                           summarize(meanCt = mean(Ct, na.rm = TRUE)))
+
+```
+
+## In WT effect of treatment
+
+
+```{r statistics_on_WT,echo=FALSE}
+## WT effect of treatment
+
+agdata_WT <- agdata[agdata$Genotype=="WT",]
+t.test(agdata_WT[agdata_WT$Treatment=="T","x"],agdata_WT[agdata_WT$Treatment=="C","x"])
+```
+
+## Stats on interaction of genotype and treatment
+
+```{r statistics_on_interaction,echo=FALSE}
+
+## check ANOVA for Genotype and treatment interaction
+s <- aov(x~Genotype:Treatment, data=agdata)
+summary(s)
+```
+
