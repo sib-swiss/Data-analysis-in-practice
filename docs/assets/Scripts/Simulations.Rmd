@@ -1,0 +1,184 @@
+---
+title: "Simulation data"
+author: "SIB Teachers" ##Best practice always write the name of the author
+date: "`r Sys.time()`" ##and the date of today!
+header-includes:
+    - \usepackage{caption}
+output: 
+  html_document: #funky theme for an html that floats with a special theme for the sections and numbering
+    toc: true 
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: united
+    highlight: tango
+---
+
+# Simulation data	
+
+
+In this exercise, we try to generate some simulated data in order to visualize how change in the different variables affects the final output. Therefore, we will be able to understand the effect of sample size, of percentage of significant genes, of difference in mean and of variance on the true positifs and true negatives. 
+
+```{r setup, include=FALSE}
+#start with the general setup the opts_chunk sets the options for all the chunks. 
+knitr::opts_chunk$set(echo = FALSE)
+```
+# Libraries needed
+
+Here no special libraries are necessary for this exercise. All functions are part of the basic packages.
+
+```{r}
+#This section has no name and the parameters are as set in the start
+#Best practice: in this first section select all the libraries needed
+#Also set working/data/result directory here if needed for the 
+#For this exercice no packages are needed
+```
+
+# Parameters
+
+```{r data_generation_parameters, echo =TRUE}
+### let us generate some variables
+N1 <- 3 #number of WT samples
+N2 <- 10 #number of KO samples
+
+n <- 10000 #number of total genes
+S <- 100 # number of sgn genes
+```
+
+# Prepare data matrices
+
+This paragraph is boring and not necessary to be shown. We prepare the matrices with names corresponding to genes that are significant or not, to be then used for illustration later on.
+
+```{r data_generation}
+#This paragraph you do not need to see it
+names <- c(paste0(rep("NSign",n-S),1:(n-S)),paste0(rep("Sign",S),1:(S))) # names of the genes, such that we recognize the NSign = not significant genes, from the Sign = significant genes
+
+d1 <- matrix(rep(0,(n*N1)),nrow=n)
+#WT gene expression matrix
+rownames(d1)<-names
+colnames(d1)<-paste0("WT",1:N1)
+
+d2 <- matrix(rep(0,(n*N2)),nrow=n)
+#WT gene expression matrix
+rownames(d2)<-names
+colnames(d2)<-paste0("KO",1:N2)
+```
+
+
+# Important parameters to be chosen
+
+These parameters are what one can change to then understand the effect of changing variance mean or difference in means in the significant genes.
+
+```{r data_generation_parameters_simulation,echo = TRUE}
+
+mu <- 10 #chosen mean  
+sig <- 1 #chosen variance
+delta <- 3 # for the significant genes the difference in means
+```
+
+# Generate the data using rnorm
+
+Rnorm is a function generating random numbers that are following a normal distribution.
+```{r data_generation_matrix,echo = TRUE}
+###Generate the data
+for(i in 1:(n-S)){ ## start the for loop for the NSign genes
+	d1[i,] <- rnorm(N1,mu,sig) #generate random norm distribution for WT
+	d2[i,] <- rnorm(N2,mu,sig) #generate random normal distribution for KO
+	}
+	
+for(i in 1:(S)){ ## start the for loop for the NSign genes	
+	d1[(n-S)+i,] <- rnorm(N1,mu,sig)
+	d2[(n-S)+i,] <- rnorm(N2,mu+delta,sig)
+}
+```
+
+# Plot
+
+```{r}
+pca <- prcomp(t(cbind(d1,d2)))
+plot(pca$x[,c(1,2)],col=c(rep("blue",10),rep("red",10)))
+```
+
+
+# Shapiro test
+
+```{r shapiro,echo = TRUE}
+###do the shapiro test for the genes
+var1 <-  rep(10,n)
+var2 <-  rep(10,n)
+
+for(i in 1:n){
+		var1[i]<-shapiro.test(d1[i,])$p.value
+		var2[i]<-shapiro.test(d2[i,])$p.value
+}
+var_correct1 <- p.adjust(var1)
+var_correct2 <- p.adjust(var2)
+min(var1)
+min(var_correct2)
+```
+
+# Test for significance
+
+```{r significance test,echo = TRUE}
+
+###do the t.test for significance
+ttest1 <-  rep(10,n)
+foldchange <- rep(10,n)
+names(ttest1) <- names
+for(i in 1:n){
+  foldchange[i] <- mean(d1[i,])-mean(d2[i,])
+		ttest1[i]<-t.test(d1[i,],d2[i,])$p.value
+}
+```
+
+
+# Plot a histogramm
+
+```{r histogramm,echo = TRUE}
+	hist(ttest1)
+```
+	
+# Number of genes with pvalue <0.05
+
+```{r significance test less than 05,echo = TRUE}
+sgn <- ttest1[ttest1[]<0.05]
+length(sgn)
+	
+```
+
+# Adjust for multiple testing
+
+This is needed as several tests are performed.
+
+```{r multiple testing,echo = TRUE}	
+#?p.adjust check the function if you do not know 
+	ttest_adj <- p.adjust(ttest1,method="BH")
+	names(ttest_adj)<- names
+```
+
+# Check what is significant
+
+How many genes are still significant after multiple testing correction.
+
+```{r significance test padjust,echo = TRUE}	
+min(ttest_adj)
+length(ttest_adj[ttest_adj<0.05])
+```
+
+# Error !
+
+Count the number of genes that are not supposed to be significant (they are named "NSig"), but are. 
+
+```{r significance test neg padjust,echo = TRUE}	
+neg <- ttest_adj[grep("NSig",names)]
+length(neg[neg[]<0.05])
+```
+
+# True positives
+
+These are the number of genes that are significant and are supposed to be signifciant.
+
+```{r significance test pos,echo = TRUE}	
+pos <- ttest_adj[setdiff(1:n,grep("NSig",names))]
+length(pos[pos[]<0.05])
+```
